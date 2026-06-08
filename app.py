@@ -3,7 +3,7 @@ import time
 import random
 import re
 import streamlit as st
-from ddgs import DDGS
+from duckduckgo_search import DDGS
 
 # =====================================================================
 # 1. VISUAL INTERFACE STYLING
