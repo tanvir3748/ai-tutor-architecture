@@ -159,4 +159,18 @@ if st.session_state.active:
                 st.markdown(f"""
                 <div class="card-error">
                     <h3>⚠️ Conceptual Variance Identified by SapiensTutor.</h3>
-                    <p style="font-size:1.1rem; margin-bottom:12px;">Your submission does not provide enough domain
+                    <p style="font-size:1.1rem; margin-bottom:12px;">Your submission does not provide enough domain-specific keywords or structured logic steps to prove conceptual mastery.</p>
+                    <span class="metric-badge">🔍 Found Pattern: Missing Token Profile</span> &nbsp;
+                    <span class="metric-badge">🏷️ Error Type: Insufficient Logical Depth</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                st.markdown(f"""
+                <div class="card-hint">
+                    <h4 style="margin-top:0; color:#78350F;">💡 Progressive Hint Architecture:</h4>
+                    <p style='margin-bottom:6px;'><b>Step 1:</b> To improve your grade, expand your argument to explicitly include or discuss core terms like: <u>{', '.join(active_q['keys'][:3])}</u>.</p>
+                    <p style='margin-bottom:0;'><b>Step 2:</b> Make sure you are describing the active operational sequence or real-world function, rather than just restating the question text.</p>
+                </div>
+                """, unsafe_allow_html=True)
+else:
+    st.info("💡 Ready for deployment! Type any subject or homework topic into the block above and click the button to trigger your autonomous learning workspace.")
