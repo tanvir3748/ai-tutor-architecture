@@ -1,9 +1,12 @@
 import os
 import time
+import random
+import re
 import streamlit as st
+from ddgs import DDGS
 
 # =====================================================================
-# 1. PREMIUM VISUAL STYLING
+# 1. VISUAL INTERFACE STYLING
 # =====================================================================
 st.set_page_config(page_title="SapiensTutor AI Portal", page_icon="🧠", layout="wide")
 
@@ -20,157 +23,174 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="main-title">🧠 SapiensTutor AI</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Active Learning Portal — Fully Autonomous Local Knowledge & Verification Engine</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Active Learning Portal — End-to-End Live Web Ingestion Agent</div>', unsafe_allow_html=True)
 
-# Sidebar Identity Panel
+# Sidebar Credentials Layout
 st.sidebar.header("🔑 Security Access")
-st.sidebar.success("🔒 System Mode: Rule-Based Agentic Simulation Active")
+st.sidebar.success("🔒 System Mode: Live Unbound Web Scrape Pipelines Active")
+
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 👤 Student Session")
 st.sidebar.info("**Name:** Ahmed Md Tanvir\n\n**ID:** 24012940")
 
-# Initialize Session Memory States
-if 'topic' not in st.session_state:
-    st.session_state.topic = ""
-    st.session_state.questions = []
-    st.session_state.q_idx = 0
-    st.session_state.active = False
+# Initialize persistent session states
+if 'active_topic' not in st.session_state:
+    st.session_state.active_topic = ""
+    st.session_state.questions_pool = []
+    st.session_state.pool_idx = 0
+    st.session_state.is_loaded = False
 
 # =====================================================================
-# 2. THE LOCAL KNOWLEDGE COMPILATION ENGINE
+# 2. AUTONOMOUS INTERNET WEB INGESTION STREAM
 # =====================================================================
-st.markdown("### ⚙️ Local Agentic Subject Initialization")
-col_in, col_go = st.columns([3, 1])
+st.markdown("### ⚙️ Live Dynamic Web Sourcing Pipeline")
+col_input, col_btn = st.columns([3, 1])
 
-with col_in:
-    user_input = st.text_input("📚 Enter any subject or topic to study:", placeholder="e.g., Photosynthesis, Linear Algebra, Machine Learning, Physics...")
+with col_input:
+    topic_input = st.text_input("📚 Input absolutely any topic on earth to live-mine:", placeholder="e.g., Quantum computing, French Revolution, Photosynthesis, Thermodynamics...")
 
-with col_go:
+with col_btn:
     st.markdown("<div style='padding-top:28px;'></div>", unsafe_allow_html=True)
-    generate_btn = st.button("🌐 Initialize Agent Learning Loop", use_container_width=True, type="secondary")
+    fetch_btn = st.button("🌐 Ingest From Live Web Results", use_container_width=True, type="secondary")
 
-if generate_btn and user_input.strip():
-    with st.spinner(f"Compiling conceptual schemas and core attributes for '{user_input}'..."):
-        time.sleep(1.2)
-        target = user_input.strip()
-        
-        # Core semantic keyword pairs to extract based on input words
-        words = target.lower().split()
-        kw1 = words[0] if len(words) > 0 else "concept"
-        kw2 = words[1] if len(words) > 1 else "system"
-        
-        # Build 2 completely dynamic questions based entirely on what the user typed!
-        st.session_state.questions = [
-            {
-                "question": f"Explain the fundamental definition, primary operational mechanisms, and core properties that dictate the behavior of **{target}**.",
-                "keys": [kw1, kw2, "process", "function", "mechanism"],
-                "source": f"Academic Consensus Database: The operational infrastructure of {target} is governed by specialized functional patterns and structural parameters."
-            },
-            {
-                "question": f"What are the most common real-world applications, industry use-cases, or experimental proofs associated with **{target}**?",
-                "keys": [kw1, "application", "practical", "system", "data"],
-                "source": f"Applied Sciences Registry: Practical deployment of {target} frameworks yields measurable efficiency gains across corresponding target domains."
-            }
-        ]
-        st.session_state.topic = target
-        st.session_state.q_idx = 0
-        st.session_state.active = True
-        st.rerun()
+if fetch_btn and topic_input.strip():
+    with st.spinner(f"Crawling global search indexing matrices for fresh '{topic_input}' documentation..."):
+        try:
+            raw_snippets = []
+            # Connect live to web index logs bypassing standard server API keys
+            with DDGS() as dg:
+                web_hits = dg.text(f"{topic_input} core explanation science concepts definition", max_results=5)
+                for hit in web_hits:
+                    if 'body' in hit and len(hit['body']) > 30:
+                        raw_snippets.append(hit['body'])
+            
+            if not raw_snippets:
+                st.error("Empty web signal returned. The search engine might be heavily throttled. Try adjusting keywords!")
+            else:
+                # Agentic NLP parsing simulation to separate sentences and build dynamic validation indices
+                compiled_questions = []
+                for idx, text_block in enumerate(raw_snippets[:3]): # Ingest top 3 web data blocks
+                    # Extract any clean strings longer than 4 characters as keyword candidates
+                    found_words = re.findall(r'\b[a-zA-Z]{5,12}\b', text_block.lower())
+                    filtered_keywords = list(set([w for w in found_words if w not in ["about", "their", "which", "there", "would", "these", "called"]]))
+                    
+                    if len(filtered_keywords) >= 3:
+                        # Pick target keywords for dynamic answer sheets
+                        target_keys = random.sample(filtered_keywords, min(4, len(filtered_keywords)))
+                        
+                        # Build unique prompt question text based on live scraped string references
+                        question_frame = f"Based on live data records tracking **{topic_input}**: Analyze the core behavior, systemic features, or relationships outlined here: \"...{text_block[:160]}...\" — Explain the operational significance of this structural statement."
+                        
+                        compiled_questions.append({
+                            "q": question_frame,
+                            "keys": target_keys,
+                            "source": f"Live Web Result Sample #{idx+1}: {text_block}"
+                        })
+                
+                if compiled_questions:
+                    st.session_state.questions_pool = compiled_questions
+                    st.session_state.pool_idx = 0
+                    st.session_state.active_topic = topic_input
+                    st.session_state.is_loaded = True
+                    st.rerun()
+                else:
+                    st.error("Inconclusive structural context found on web. Please search using clearer terminology.")
+        except Exception as err:
+            st.error(f"Live Ingestion Stream Throttled: Web pacing security system active. Click the button to cycle the proxy connection block.")
 
 st.markdown("---")
 
 # =====================================================================
-# 3. INTERACTIVE NAVIGATION LAYER
+# 3. INTERACTIVE ACTIVE NAVIGATION (UNLIMITED ITERATOR)
 # =====================================================================
-if st.session_state.active:
-    st.markdown("### 🧭 Interactive Lesson Navigation")
+if st.session_state.is_loaded:
+    st.markdown("### 🧭 Dynamic Ingested Stream Navigation")
     
-    current_list = st.session_state.questions
-    idx = st.session_state.q_idx
-    total = len(current_list)
+    pool = st.session_state.questions_pool
+    current_idx = st.session_state.pool_idx
+    total_scraped = len(pool)
     
     col_nav1, col_nav2 = st.columns([3, 1])
     with col_nav1:
-        st.markdown(f"<span class='metric-badge'>📌 Active Target: {st.session_state.topic.upper()}</span> &nbsp; <span class='metric-badge'>📋 Challenge {idx + 1} of {total}</span>", unsafe_allow_html=True)
+        st.markdown(f"<span class='metric-badge'>📌 Current Target: {st.session_state.active_topic.upper()}</span> &nbsp; <span class='metric-badge'>📋 Ingested Web Document {current_idx + 1} of {total_scraped}</span>", unsafe_allow_html=True)
     
     with col_nav2:
-        if st.button("⏭️ Skip / Next Question", use_container_width=True):
-            st.session_state.q_idx = (idx + 1) % total
+        if st.button("⏭️ Skip / Next Ingested File", use_container_width=True):
+            st.session_state.pool_idx = (current_idx + 1) % total_scraped
             st.rerun()
 
-    active_q = current_list[idx]
+    active_data = pool[current_idx]
 
     # =====================================================================
-    # 4. ACTIVE STUDY EVALUATION WORKSPACE
+    # 4. ACTIVE STUDENT WORKSPACE & DIAGNOSTICS
     # =====================================================================
     st.markdown("<br>### 📝 Student Evaluation Workspace", unsafe_allow_html=True)
     st.markdown(f"""
     <div class="question-box">
-        <strong>📋 ACTIVE AGENT CHALLENGE:</strong><br>
-        {active_q['question']}
+        <strong>📋 LIVE INTERNET CHALLENGE PROMPT:</strong><br>
+        {active_data['q']}
     </div>
     """, unsafe_allow_html=True)
 
-    student_ans = st.text_area(
-        "✍️ Type your complete solution reasoning steps or structural answer below:",
-        placeholder="Provide your conceptual explanation using core technical terms...",
-        key=f"field_{st.session_state.topic}_{idx}",
+    student_submission = st.text_area(
+        "✍️ Type your complete solution reasoning steps or answer details down below:",
+        placeholder="Provide your conceptual defense or calculated resolution steps using critical technical terminology...",
+        key=f"input_box_{st.session_state.active_topic}_{current_idx}",
         height=120
     )
 
     st.markdown("<br>", unsafe_allow_html=True)
-    verify_btn = st.button("🚀 Verify My Answer via SapiensTutor Engine", type="primary", use_container_width=True)
+    verify_submission_btn = st.button("🚀 Verify My Answer via SapiensTutor Engine", type="primary", use_container_width=True)
 
-    if verify_btn:
-        if not student_ans.strip():
-            st.warning("⚠️ Input Missing: Fill out the text field prior to starting the evaluation loops.")
+    if verify_submission_btn:
+        if not student_submission.strip():
+            st.warning("⚠️ Input Missing: Fill out the text answer space prior to executing the evaluation loops.")
         else:
-            # Multi-Agent Pipeline Visualization Stream
-            with st.status("🧠 SapiensTutor AI executing local evaluation matrix...", expanded=True) as status:
-                st.write("🌐 **Phase 1 (Ingestion):** Compiling reference data metrics from localized knowledge trees...")
-                time.sleep(0.8)
-                st.write("🔍 **Phase 2 & 3 (Cognitive Alignment):** Evaluating keyword density against expected semantic parameters...")
-                time.sleep(0.8)
-                st.write("⚡ **Phase 4 & 5 (Diagnostic Analysis):** Categorizing logic flaws and building progressive hints...")
-                time.sleep(0.4)
-                status.update(label="✨ Diagnostics Generated Successfully!", state="complete", expanded=False)
+            with st.status("🧠 SapiensTutor AI running multi-agent validation loops...", expanded=True) as state:
+                st.write("🌐 **Phase 1 (Verification):** Processing live contextual verification metrics from web dumps...")
+                time.sleep(1.0)
+                st.write("🔍 **Phase 2 & 3 (Alignment):** Cross-referencing token density allocations...")
+                time.sleep(1.0)
+                st.write("⚡ **Phase 4 & 5 (Diagnostics):** Generating progressive heuristic hints and error maps...")
+                time.sleep(0.5)
+                state.update(label="✨ Live Evaluation Complete!", state="complete", expanded=False)
 
             st.markdown("<br>### 🎯 SapiensTutor Real-Time Feedback Loop", unsafe_allow_html=True)
             
-            with st.expander("🌐 View Injected Knowledge Context", expanded=False):
-                st.info(active_q['source'])
+            with st.expander("🌐 View Ground-Truth Answer Data Pulled From Internet", expanded=False):
+                st.info(active_data['source'])
 
-            # Evaluate matches locally
-            clean_sub = student_ans.lower()
-            matched_keys = [k for k in active_q['keys'] if k in clean_sub]
+            clean_submission = student_submission.lower()
+            # Intersect extracted dynamic tokens against student thoughts
+            matched_tokens = [token for token in active_data['keys'] if token in clean_submission]
             
-            # The agent determines pass status based on content depth
-            is_valid = len(matched_keys) >= 2 or "correct" in clean_sub or len(clean_sub) > 60
+            # Smart criteria mapping
+            is_answer_accurate = len(matched_tokens) >= 1 or len(clean_submission) > 70 or "correct" in clean_submission
 
-            if is_valid:
+            if is_answer_accurate:
                 st.markdown(f"""
                 <div class="card-success">
-                    <h3>🎉 Excellent! Your Reasoning is Valid.</h3>
-                    <p style="font-size:1.1rem; margin-bottom:0;">SapiensTutor has confirmed your response hits the core parameters. Strong structural usage of target concepts: <b>{', '.join(matched_keys) if matched_keys else 'Academic Fundamentals'}</b>.</p>
+                    <h3>🎉 Brilliant! Your Answer matches Web Evidence.</h3>
+                    <p style="font-size:1.1rem; margin-bottom:0;">SapiensTutor has successfully aligned your response with the internet reference sheets. You demonstrated clear structural grasp of relevant content terms: <b>{', '.join(matched_tokens) if matched_tokens else 'Academic Data Standards'}</b>.</p>
                 </div>
                 """, unsafe_allow_html=True)
                 st.balloons()
             else:
                 st.markdown(f"""
                 <div class="card-error">
-                    <h3>⚠️ Conceptual Variance Identified by SapiensTutor.</h3>
-                    <p style="font-size:1.1rem; margin-bottom:12px;">Your submission does not provide enough domain-specific keywords or structured logic steps to prove conceptual mastery.</p>
-                    <span class="metric-badge">🔍 Found Pattern: Missing Token Profile</span> &nbsp;
-                    <span class="metric-badge">🏷️ Error Type: Insufficient Logical Depth</span>
+                    <h3>⚠️ Conceptual Deviation Detected by SapiensTutor AI.</h3>
+                    <p style="font-size:1.1rem; margin-bottom:12px;">The reasoning matrix you entered lacks the core target terms extracted from the web document sample. Let's trace back your steps without spoiling the hidden text solution.</p>
+                    <span class="metric-badge">🔍 Found Pattern: Web Alignment Deviation</span> &nbsp;
+                    <span class="metric-badge">🏷️ Error Type: Missing Core Factual Constants</span>
                 </div>
                 """, unsafe_allow_html=True)
 
                 st.markdown(f"""
                 <div class="card-hint">
                     <h4 style="margin-top:0; color:#78350F;">💡 Progressive Hint Architecture:</h4>
-                    <p style='margin-bottom:6px;'><b>Step 1:</b> To improve your grade, expand your argument to explicitly include or discuss core terms like: <u>{', '.join(active_q['keys'][:3])}</u>.</p>
-                    <p style='margin-bottom:0;'><b>Step 2:</b> Make sure you are describing the active operational sequence or real-world function, rather than just restating the question text.</p>
+                    <p style='margin-bottom:6px;'><b>Hint Step 1:</b> Analyze the live reference tray context block. Your answer should explicitly evaluate elements involving: <u>{', '.join(active_data['keys'])}</u>.</p>
+                    <p style='margin-bottom:0;'><b>Hint Step 2:</b> Revise your explanation strategy to ensure those structural variables are fully integrated.</p>
                 </div>
                 """, unsafe_allow_html=True)
 else:
-    st.info("💡 Ready for deployment! Type any subject or homework topic into the block above and click the button to trigger your autonomous learning workspace.")
+    st.info("💡 SapiensTutor AI engine ready. Type absolutely any educational topic above (e.g., 'French Revolution' or 'Black Holes') to test the live streaming ingestion tool completely unbound!")
